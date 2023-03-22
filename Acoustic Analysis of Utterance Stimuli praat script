@@ -1,6 +1,6 @@
 ﻿
 #======================================#
-#      EMOTIONAL PROSODY PROJECT       #    #----------LAST EDIT：2022/09/26-----------#
+#      EMOTIONAL PROSODY PROJECT       #    #----------LAST EDIT：2022/09/26 (main coding part)-----------#
 #    MAKE ACOUSTIC MEASURES TABLE      #
 #======================================#
 
@@ -250,7 +250,7 @@ for i to nTg
 		
 endfor
 
-exitScript: "ALL SUCCESS!!"
+exitScript: "DONE!"
 
 
 
@@ -265,82 +265,8 @@ exitScript: "ALL SUCCESS!!"
 
 
 
-#####=============================================================MY NOTES============================================================#####
 
 
-
-#####今後加える要素#####===================================================================
-
-☑F0 mean
-☑F0 SD
-☑F0 range
-☑Intensity mean
-☑Intensity SD(Pascal)
-☑Intensity range
-☑HNR
-☑Jitter
-☑Shimmer
-☑% silence 
-☑glide (f0 end - f0 start) 
-☑Mean Absolute Slope
-☑F1 center f
-☑F2 center f
-☑F3 center f
-☑F1 bandwidth  
-☑Alpha ratio
-☑Hammarberg Index
-☑Spectral Slope 0-500 Hz and 500-1500 Hz
-☑F1 F2 F3 relative energy 
-☑F0peak ene:F1center peak en,F2center peak en,F3center peak en
-☑H1:H2 
-☑H1:A3 
-{✖}speech rate #####====>in this case, how many mora per second? 
-☑(utterance)duration
-
-##########################========================================================
-
-
-
-
-       
-##########今後またいるかも？
-
-					###cleaning!###
-					#このスピーカーの次のWordを調べるまでに、今のwordにspecificなものを消しておく
-					selectObject: extractedWordSound 
-					plusObject: wordPitchID 
-					plusObject: wordFormantObjID
-					plusObject: wordSpectrumID 
-					plusObject: wordLtasID 
-					Remove
-				endif	
-
-			endfor
-
-
-
-
-
-(h1h2のとりかたoriginal)
-
-					h1 = Get maximum: f0peak, twicef0, "none"   
-					h2 = Get maximum: h1, twicef0, "none"
-
-
-(ltasをえらんだあと)
-To SpectrumTier (peaks)
-List: "yes", "yes", "yes"
-
-
-（original Glide）
-selectObject: wordPitchID
-f0end = Get value at time: wordTimeE, "Hertz", "linear"
-f0start =  Get value at time: wordTimeS, "Hertz", "linear"
-glide = f0end - f0start
-
-
-
-#made change on 12/14/2022
 
 
 
