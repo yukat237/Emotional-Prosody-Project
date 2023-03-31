@@ -1,0 +1,55 @@
+#===============================================#
+#            Get_an_intensity_Table             #
+#===============================================#
+
+#####==========================================================================================######
+#Data prep
+#    the entire sound must be your interest (i.e., takes the entire sound to measure)
+#    algorithm: https://www.fon.hum.uva.nl/praat/manual/Sound__Get_intensity__dB_.html
+#    assumes that the sound files are in the same folder as this script
+#####==========================================================================================######
+
+#Optional
+select all
+Remove
+
+form Get Intensity table 
+	sentence directory
+	sentence outDir
+endform
+
+
+#Output table
+tblID = Create Table with column names... tblID 0 filename AvgInt
+
+#set directory
+directory$ = "C:\Users\tatsu\iCloudDrive\休学2020\Emotional Prosody Project\FEMALE To get intensity\FEMALE To get intensity Final"
+
+#read files
+readInSoundString = Create Strings as file list: "WavList", directory$ + "/*.wav" 
+n = Get number of strings
+#(いらなくなった)：readInTextGridString = Create Strings as file list: "TextGridList", directory$ + "/*.TextGrid"
+
+for i to n
+	#soundが入っているstringを選択
+	selectObject: readInSoundString
+	#soundが入っているstringの中のi番目のアイテムの名前をとる。例えば、i=1のとき、「10_anger.wav」が取れている
+	soundName$ = Get string: i
+	#それをobjectリストに読み込み
+	soundID = Read from file: directory$ + "/" + soundName$
+	#(いらなくなった)その音声ファイルに対応するtextgridを読む
+	soundBaseName$ = soundName$ - "_mono_F.wav"
+	#(いらなくなった)Read from file: directory$ + "/" + soundBaseName$ + ".TextGrid"
+	#(いらなくなった)plusObject: soundID
+	meanInt = Get intensity (dB)
+
+	#表にかきこみ
+	selectObject: "Table tblID"
+        Append row
+        tblrow = Get number of rows
+        Set string value: tblrow, "filename", soundBaseName$ 
+        Set numeric value: tblrow, "AvgInt", meanInt
+
+endfor
+
+exitScript: "Done!"
