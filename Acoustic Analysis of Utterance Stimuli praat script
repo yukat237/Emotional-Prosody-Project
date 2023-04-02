@@ -5,15 +5,19 @@
 #======================================#
 
 
-##comment out these if there is no object##-------
+##------comment out these if not necessary----##
 select all
 Remove
 
 
-##------locations of sounds and textgrids--------##
+##------Get locations of sounds and textgrids--------##
 
-stimSound$ = "C:/Users/tatsu/iCloudDrive/休学2020/Emotional Prosody Project/For acoustic analysis"
-stimTg$ = "C:/Users/tatsu/iCloudDrive/休学2020/Emotional Prosody Project/For acoustic analysis/textgrid"
+form Directory
+	comment Where are the sounds?
+	sentence stimSound C:/Users/tatsu/iCloudDrive/休学2020/Emotional Prosody Project/For acoustic analysis
+	comment Where are the Textgrids?
+	sentence stimTg C:/Users/tatsu/iCloudDrive/休学2020/Emotional Prosody Project/For acoustic analysis/textgrid
+endform
 
 #---may be useful if using Windows---#
 stimSound$ = replace$(directory$,"\","/",0)
