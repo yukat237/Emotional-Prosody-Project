@@ -4,6 +4,8 @@
 #    MAKE ACOUSTIC MEASURES TABLE      #
 #======================================#
 
+##Note: this is an old version, where acoutic information are all collecgted utterance-wise.
+##      Currently working on a new version.
 
 ##------comment out these if not necessary----##
 select all
