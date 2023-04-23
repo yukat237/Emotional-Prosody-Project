@@ -3,6 +3,11 @@
 #    MAKE ACOUSTIC MEASURES TABLE 2    #
 #======================================#
 
+## What's new in this script?
+# 1) measuring with both utterances and vowels, when applicable
+# 2) using female or male parameters for applicable measures
+
+
 ##------Get locations of sounds and textgrids--------##
 
 form Directory
