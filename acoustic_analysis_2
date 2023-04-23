@@ -1,0 +1,17 @@
+#======================================#
+#      EMOTIONAL PROSODY PROJECT       #
+#    MAKE ACOUSTIC MEASURES TABLE 2    #
+#======================================#
+
+##------Get locations of sounds and textgrids--------##
+
+form Directory
+	comment Where are the sounds?
+	sentence stimSound C:/Users/tatsu/iCloudDrive/休学2020/Emotional Prosody Project/For acoustic analysis
+	comment Where are the Textgrids?
+	sentence stimTg C:/Users/tatsu/iCloudDrive/休学2020/Emotional Prosody Project/For acoustic analysis/textgrid
+endform
+
+
+#####Making an output table#####------------------------------------------------------
+
