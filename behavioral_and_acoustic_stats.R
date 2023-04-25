@@ -4,6 +4,9 @@
 
 ########################################################################
 
+# Note (4/25/2023): some acoustic stats below are not making sense as I did not fully 
+#                   understand the LMER at the point of writing (i was a junior)-- so they are to be modified!
+
 # Goal: to combine Main study Data Analysis script and Acoustic Analysis script, with only necessary info.
 
 ######---   workDir and librareis    -----#######
@@ -80,7 +83,7 @@ finalDf #this is a cleaned, original Behavioral data with demographics data atta
 #####---new DF for analysis---#####
 analysisdf<-data.frame(subjID=paste(1:52),
                        biormono= c(paste(rep("mono",28)),paste(rep("bi",24))), 
-                       item11=finalDf$X9.1, #????????happy
+                       item11=finalDf$X9.1, #happy
                        item25=finalDf$X9.3, 
                        item53=finalDf$X9.5, 
                        item74=finalDf$X9.8, 
@@ -96,7 +99,7 @@ analysisdf<-data.frame(subjID=paste(1:52),
                        item235=finalDf$X9.26, 
                        item242=finalDf$X9.27, 
                        item263=finalDf$X9.3.1, 
-                       item13=finalDf$X9.2, #????????sad
+                       item13=finalDf$X9.2, #sad
                        item34=finalDf$X9.4, 
                        item55=finalDf$X9.6, 
                        item62=finalDf$X9.7, 
@@ -112,27 +115,27 @@ analysisdf<-data.frame(subjID=paste(1:52),
                        item251=finalDf$X9.29, 
                        item265=finalDf$X9.31, 
                        item272=finalDf$X9.32, 
-                       item71=finalDf$X9.36, #????????anger
+                       item71=finalDf$X9.36, #anger
                        item85=finalDf$X9.38,
                        item92=finalDf$X9.39,
                        item113=finalDf$X9.4.1,
                        item141=finalDf$X9.47,
-                       item63=finalDf$X9.34,#????????surp
+                       item63=finalDf$X9.34,#surp
                        item154=finalDf$X9.43,
                        item231=finalDf$X9.51,
                        item182=finalDf$X9.53,
                        item224=finalDf$X9.56,
-                       item115=finalDf$X9.42, #????????fear
+                       item115=finalDf$X9.42, #fear
                        item122=finalDf$X9.44,
                        item171=finalDf$X9.48,
                        item192=finalDf$X9.49,
                        item262=finalDf$X9.54,
-                       item65=finalDf$X9.35,   #????????disg
+                       item65=finalDf$X9.35,   #disg
                        item114=finalDf$X9.41,
                        item135=finalDf$X9.46,
                        item254=finalDf$X9.52,
                        item275=finalDf$X9.57,
-                       item61=finalDf$X9.33,  #????????neutral
+                       item61=finalDf$X9.33,  #neutral
                        item75=finalDf$X9.37,
                        item131=finalDf$X9.45,
                        item201=finalDf$X9.5.1,
@@ -189,7 +192,6 @@ accpersubj2<-subset(accpersubj2,accpersubj2$corr_ans=="Sadness"|accpersubj2$corr
 accpersubj2$accuracy<-accpersubj2$corr_ornot/16 #add accuracy
 newmainDF<-accpersubj2[,c(1,2,3,5)] #omit correct or not column
 colnames(newmainDF)[2]<-"emo" #rewrite corr_ans to emo
-
 
 
 #####---Main Stats ---#####
