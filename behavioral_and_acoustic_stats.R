@@ -619,7 +619,7 @@ accperitem2$accuracy<-accperitem2$corr_ornot/52
 accperitem2<-subset(accperitem2,accperitem2$corr_ans=="Sadness"|accperitem2$corr_ans=="Happiness")
 #attach acoustic measure results to each item
 ac_newdf<-merge(accperitem2,actbl,by.x = "items",by.y="itemNum") #this is hap sad only?Abi/mono diff accuracy?Aper-item acoustics measure DF
-#separating bi and mono #?????????F???????????Ɉȉ??????��????????????????ˁAmain results null???��??????B
+#separating bi and mono 
 biac_newdf<-ac_newdf[ac_newdf$biormono=="bi",]
 monoac_newdf<-ac_newdf[ac_newdf$biormono=="mono",]
 
@@ -841,7 +841,6 @@ cor.test(monoac_newdf$H1H2,monoac_newdf$accuracy)
 ac_newdf
 happy_acacDf<-subset(ac_newdf, ac_newdf$corr_ans=="Happiness")
 sad_acacDf<-subset(ac_newdf, ac_newdf$corr_ans=="Sadness")
-#?????????Fmonobi??factor?Ƃ??Ȃ?ver?ł????Ȃ??????????????Ǝv???B
 #Q: overall, i did both anova and lmer but what is best? also even if these are the right ones, are they right? how to look at the results
 #Q: in visualizations, why mono is always better? bec more data?
 
@@ -1603,8 +1602,8 @@ japvissad_H1H2<-ggplot(sad_jap_acdf,aes(H1H2,acc_jap))+
   geom_point()+ geom_smooth(method = "lm", se = T)
 
 #------------------------------------------updates on 11/26-----------------------------------------------------###      
-#????????
+
 #all the stats above is analyzing only the 90% 100% accuracy data by Jap ppl ...of cousre no sig diff for most of them
-#if need to ???{?l?̂??????Ȃ??Amain study?Ɏg???Ȃ??��??????܂߂Ē??ׂȂ??Ƃł????ˁB
+
 
 
