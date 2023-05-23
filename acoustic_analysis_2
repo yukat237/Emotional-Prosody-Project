@@ -145,103 +145,144 @@ i = 1
 	selectObject: tgID 
 	intN = Get number of intervals: 2
 
-	for k to intN
-		# check what is in this interval
-		kLabel$ = Get label of intervals: 2, k
+	#extract all the non-empty intervals as sound obj
+	selectObject: sdID
+	plusObject: tgID
+	Extract non-empty intervals: 2, "no"
 
-		# only look at non-empty interval
-		if kLabel$ <> ""
-			intervalS = Get start time of interval: 2, k
-			intervalE = Get end time of interval: 2, k\
-			voweldur = intervalE - intervalS
-			midpoint = intervalS + (voweldur/2)
+	#get IDs of extracted sounds just created
+	firstID = selected ("Sound",1)
+	lastID = selected ("Sound",-1)
 
-		#	=========
-		#	Formants
-		#	=========
-			selectObject: sdID
-			formantID = To Formant (burg): 0, 5, 5500, 0.025, 50
-			f1 = Get value at time: 1, midpoint, "hertz", "linear"
-			f2 = Get value at time: 2, midpoint, "hertz", "linear"
-			f3 = Get value at time: 3, midpoint, "hertz", "linear"
-			f4 = Get value at time: 4, midpoint, "hertz", "linear"
-			
-			#bandwidth
-			f1bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
-			f2bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
-			f3bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
-			f4bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
+	count = 0
+	for k from firstID to lastID
+		# use this count to record which vowel in the file this is. (i.e., vowel No.?? of this sentence)
+		count = count + 1
+		selectObject: k
 
-		#	=======
-		#	  F0
-		#	=======
-	
-			vowelPitchID = To Pitch: 0.0, 75, 600
-			f0mean = Get mean: 0,0, "Hertz" 
-			f0min = Get minimum: 0, 0, "Hertz", "parabolic"
-			f0max = Get maximum: 0, 0, "Hertz", "parabolic"
-			f0range = f0max - f0min
-			f0SD = Get standard deviation: 0, 0, "Hertz"
+		#get vowel
+		currVowel$ = selected$ ("Sound")	
 
-			
-#	===========
-#	 Jitter
-#	===========
-	selectObject: intExtractedID
-	jitterFileID = To PointProcess (periodic, cc): 75, 600
-	localJ = Get jitter (local): 0, 0, 0.0001, 0.02, 1.3
-	localAbsJ = Get jitter (local, absolute): 0, 0, 0.0001, 0.02, 1.3
-	rapJ = Get jitter (rap): 0, 0, 0.0001, 0.02, 1.3
-	ppq5J = Get jitter (ppq5): 0, 0, 0.0001, 0.02, 1.3
-	ddpJ = Get jitter (ddp): 0, 0, 0.0001, 0.02, 1.3
+		#duration
+		voweldur = Get total duration
+		
+		#midpoint
+		midpoint = voweldur/2
 
+	#	=========
+	#	Formants
+	#	=========
+		selectObject: k
+		formantID = To Formant (burg): 0, 5, 5500, 0.025, 50
+		f1 = Get value at time: 1, midpoint, "hertz", "linear"
+		f2 = Get value at time: 2, midpoint, "hertz", "linear"
+		f3 = Get value at time: 3, midpoint, "hertz", "linear"
+		f4 = Get value at time: 4, midpoint, "hertz", "linear"
+		
+		#bandwidth
+		f1bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
+		f2bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
+		f3bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
+		f4bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
 
-#	===========
-#	 Shimmer
-#	===========
-	selectObject: intExtractedID
-	plusObject: jitterFileID		
-	localShim = Get shimmer (local): 0, 0, 0.0001, 0.02, 1.3, 1.6
-	localDbShim = Get shimmer (local_dB): 0, 0, 0.0001, 0.02, 1.3, 1.6
-	apq3Shim = Get shimmer (apq3): 0, 0, 0.0001, 0.02, 1.3, 1.6
-	apq5Shim = Get shimmer (apq5): 0, 0, 0.0001, 0.02, 1.3, 1.6
-	apq11Shim = Get shimmer (apq11): 0, 0, 0.0001, 0.02, 1.3, 1.6
-	ddaShim = Get shimmer (dda): 0, 0, 0.0001, 0.02, 1.3, 1.6
+	#	=======
+	#	  F0
+	#	=======
 
+		selectObject: k	
+		vowelPitchID = To Pitch: 0.0, 75, 600
+		#not sure if f0mid is meaningful so earse if i do not need this.
+		f0mid = Get value at time: midpoint, "Hertz", "linear"
+		f0mean = Get mean: 0,0, "Hertz" 
+		f0min = Get minimum: 0, 0, "Hertz", "parabolic"
+		f0max = Get maximum: 0, 0, "Hertz", "parabolic"
+		f0range = f0max - f0min
+		f0SD = Get standard deviation: 0, 0, "Hertz"
 
-#	======
-#	 HNR 
-#	======
-	harmonicFileID = To Harmonicity (cc): 0.01, 75, 0.1, 1
-	hnrMean = Get mean: 0, 0
-	hnrSD = Get standard deviation: 0, 0
+	#	=======
+	#	  HNR
+	#	=======
+		
+		selectObject: k	
+		harmoID = To Harmonicity (cc): 0.01, 75, 0.1, 1
+		hnrMean = Get mean: 0, 0
+		hnrSD = Get standard deviation: 0, 0
 
-#	======
-#	 H1 
-#	======
+	#	======
+	#	 H1amp
+	#	======
+		#DiCanto getting from invl_pitch (=Pitch (ac) object
 		
 
-#	========
-#	 H1-H2 
-#	========
-	
+
+	#	========
+	#	 H1-H2  #Dicanto was taking this from ltas. also db was Get Maximum
+	#	========
+		h1Hz = f0mean
+		h2Hz = f0mean*2
+
+		h1Hz_low = h1Hz - (h1Hz/10)
+		h1Hz_high = h1Hz + (h1Hz/10) 		
+		
+		h2Hz_low = h2Hz - (h2Hz/10)
+		h2Hz_high = h2Hz + (h2Hz/10) 	
+
+		selectObject: k	
+		vowelLtas = To Ltas (pitch-corrected): f0min, f0max, 5000, 100, 0.0001, 0.02, 1.3
+
+		h1db = Get maximum: h1Hz_low, h1_high, None
+		h2db = Get maximum: h2Hz_low, h2_high, None
+
+		h1h2diff = h1db - h2db
+		h1h2prop = h1db/h2db
+
+	#	==========
+	#	 H1-3000Hz 
+	#	==========
 
 
-#	==========
-#	 H1-3000Hz 
-#	==========
-	
+	#	========
+	#	 A1-P0 
+	#	========
 
 
-#	================
-#	 Appending Info
-#	================
-	selectObject: tableID
-	Append row
-	tblrow = Get number of rows
-		Set string value: tblrow, "filename", basename$
-		Set numeric value: tblrow, "f0Mean", f0mean
-		Set numeric value: tblrow, "f0SD", f0SD
-		Set numeric value: tblrow, "f0Range", f0range
+
+	#	===========
+	#	 Jitter
+	#	===========
+			selectObject: intExtractedID
+			jitterFileID = To PointProcess (periodic, cc): 75, 600
+			localJ = Get jitter (local): 0, 0, 0.0001, 0.02, 1.3
+			localAbsJ = Get jitter (local, absolute): 0, 0, 0.0001, 0.02, 1.3
+			rapJ = Get jitter (rap): 0, 0, 0.0001, 0.02, 1.3
+			ppq5J = Get jitter (ppq5): 0, 0, 0.0001, 0.02, 1.3
+			ddpJ = Get jitter (ddp): 0, 0, 0.0001, 0.02, 1.3
+
+
+	#	===========
+	#	 Shimmer
+	#	===========
+			selectObject: intExtractedID
+			plusObject: jitterFileID		
+			localShim = Get shimmer (local): 0, 0, 0.0001, 0.02, 1.3, 1.6
+			localDbShim = Get shimmer (local_dB): 0, 0, 0.0001, 0.02, 1.3, 1.6
+			apq3Shim = Get shimmer (apq3): 0, 0, 0.0001, 0.02, 1.3, 1.6
+			apq5Shim = Get shimmer (apq5): 0, 0, 0.0001, 0.02, 1.3, 1.6
+			apq11Shim = Get shimmer (apq11): 0, 0, 0.0001, 0.02, 1.3, 1.6
+			ddaShim = Get shimmer (dda): 0, 0, 0.0001, 0.02, 1.3, 1.6
+
+	#	================
+	#	 Appending Info
+	#	================
+			selectObject: tableID
+			Append row
+			tblrow = Get number of rows
+			Set string value: tblrow, "filename", basename$
+			Set numeric value: tblrow, "f0Mean", f0mean
+			Set numeric value: tblrow, "f0SD", f0SD
+			Set numeric value: tblrow, "f0Range", f0range
+
+		endif
+
 
 endfor
