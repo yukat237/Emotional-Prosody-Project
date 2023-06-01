@@ -1,0 +1,57 @@
+##saving pitch objects with Praat##
+
+
+#note for desktop use
+# pair 2 as an example...   C:/Users/yzt5262/OneDrive - The Pennsylvania State University/Desktop/Eric's study (SWF)/yuk_ac_analysis/pair2
+
+form Directory
+	comment folder for the sounds? (last portion specifies the pair)
+	sentence stimSd C:/Users/yzt5262/OneDrive - The Pennsylvania State University/Desktop/Eric's study (SWF)/yuk_ac_analysis/pair10
+	comment folder for the Textgrids? (last portion specifies the pair)
+	sentence stimTg C:/Users/yzt5262/OneDrive - The Pennsylvania State University/Desktop/Eric's study (SWF)/yuk_ac_analysis/pair10
+	comment folder to save Pitch objects? (last portion specifies the pair)
+	sentence saveFol C:/Users/yzt5262/OneDrive - The Pennsylvania State University/Desktop/Eric's study (SWF)/yuk_ac_analysis/pitchObj/p10
+endform
+
+
+sdListID = Create Strings as file list: "Sd filename list", stimSd$ + "/*.wav"
+fileNumSd = Get number of strings
+tgListID = Create Strings as file list: "Tg filename list", stimTg$ + "/*.label"
+fileNumTg = Get number of strings
+
+
+for i from 1 to fileNumSd
+
+#read sd file
+selectObject: sdListID
+sdName$ = Get string: i
+sdID = Read from file: stimSd$ + "/" + sdName$
+
+#read matching Tg file
+baseName$ = sdName$ - ".wav"
+selectObject: tgListID
+tgName$ = baseName$ + ".label"
+tgID = Read from file: stimTg$ + "/" + tgName$
+
+#get tone
+tone$ = Get label of interval: 1, 2
+
+#Extract Lu segment 
+selectObject: sdID
+plusObject: tgID
+luID = Extract non-empty intervals: 1, "no"
+
+#Make and save Pitch Object
+pitchID = To Pitch: 0, 30, 600
+Save as text file: saveFol$ + "/" + baseName$ + "_" + tone$ + ".Pitch"
+
+#Cleaning
+selectObject: sdID
+plusObject: tgID
+plusObject: luID
+plusObject: pitchID
+Remove
+
+endfor
+
+exitScript: "done"
