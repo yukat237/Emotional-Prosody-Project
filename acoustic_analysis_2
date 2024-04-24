@@ -3,6 +3,8 @@
 #    MAKE ACOUSTIC MEASURES TABLE 2    #
 # ------------------------------------ #
 
+######### ---- FINAL EDIT DATE: APR 23, 2024  ---- ##############
+
 ## What's new in this script?
 # 1) measuring based on utterances or vowels, depending on the measure
 # 2) using female or male parameters for applicable measures
@@ -23,23 +25,25 @@
 	# Speech Rate
 		# speech rate (duration/18 mora)
 	# Voice quality
-		# H1* (the lower the creakier)
-		# H1*-H2* (same as above) (should be nonsig according to; Utsugi, Wang and Ota,ICPhS 2019)
+		# H1* (the lower the creakier) (amplitude of the first harmonic)
+		# H1*-H2* (same as above. most popular measure for voice quality) (should be nonsig according to; Utsugi, Wang and Ota,ICPhS 2019)
 		# H1-A3 (expect Sig according to: Utsugi, Wang and Ota,ICPhS 2019)
 		# spectral tilt 
-			# H1-3000Hz
+			# H1-3000Hz (used in Chinese creaky phonation-- may not be logical to investigate this?)
 			# up to 10kHz (Erickson, et al. 2020)			
 		# HNR (irregular F0 creak type)
 		# Alpha Ratio 
 		# Hammarberg index
 		# jitter (expecting nonsig; Utsugi, Wang and Ota,ICPhS 2019)
 		# Shimmer (expecting nonsig; Utsugi, Wang and Ota,ICPhS 2019)
-		# A1-P0 (nasality; A1 = amplitude of the harmonic under F1. P0 = the amplitude of a low-frequency nasal peak (~250 Hz) (Chen 1997)
+		# A1-P0 (nasality; A1 = amplitude of the harmonic under F1. P0 = the amplitude of a low-frequency nasal peak (~250 Hz) (Chen 1997) (skipped for now as P0 approximates H1 and H2
 		# F1, F2, F3, F4 at midpoint (Erickson et al. 2008; lowered F2, F3, F4 are cues for perception of emotional (sad) speech (/i/-vowel syllable);  filter-related voice quality changes are important for perception of (intense) sadness, whereas source-related voice quality changes, for perception of happiness.)
 		# bandwidths of those formants
 ## will get not in Praat (prob want to use ProsodyPro or Voicesauce)...
 	# f0 contour pattern (Yanushevskaya, I., Gobl, C., & Ní Chasaide, A. (2018))
 	# try all with STRAIGHT (legacy ver available on Github. to use the recent one, email Kawahara sensei at Wakayama Uni)
+	# CPP is important and can get it at Voicesauce
+	# tilt upto 10kHz -- couldn't figure out how to do here, to-be-analyzed
 
 ## Stock codes for testing this script partially
 #exitScript: fileNumSd, fileNumTg
@@ -52,6 +56,11 @@ form Directory
 	sentence stimSd C:/Users/yuka/iCloudDrive/休学2020/Emotional Prosody Project/For acoustic analysis 2/stim used for main study/target (happy and sad)
 	comment folder for the Textgrids?
 	sentence stimTg C:/Users/yuka/iCloudDrive/休学2020/Emotional Prosody Project/For acoustic analysis 2/stim used for main study/target (happy and sad)/textgrid
+
+	comment
+	comment bandwidth for vowel LTAS? (Praat default...100; DiCanio set...50)
+	positive bw 100
+
 endform
 
 	#notes for laptop use: 
@@ -61,7 +70,8 @@ endform
 
 #####Making an output table#####------------------------------------------------------
 
-tableID = Create Table with column names... outputTable 0 filename vowel vowelNum f0mean f0min f0max f0range f0SD intMean intSD 1to3kHz speechRate HNR H1 H1H2 H1to3k jitter shimmer 
+sentTableID = Create Table with column names... outputTableSentence 0 filename vowelCount f0meanSent f0minSent f0maxSent f0rangeSent f0SDSent intMeanSent intSDSent 1to3kHzSent durationSent speechRate
+vowelTableID = Create Table with column names... outputTableVowel 0 filename vowel vowelNum voweldur f0mean f1mean f2mean f3mean f4mean f1center f2center f3center f4center f1width f2width f3width f4width intMeanVowel hnrMean hnrSD H1 H1H2 H1A1 H1A2 H1A3 tilt10k jitterVowel shimmerVowel
 
 
 #####Main code#####------------------------------------------------------
@@ -72,12 +82,11 @@ tgListID = Create Strings as file list: "Tg filename list", stimTg$ + "/*.TextGr
 fileNumTg = Get number of strings
 
 
-#for i to fileNumSd
+for i to fileNumSd
 
 #	========
 #	- PREP -
 #	========
-i = 1
 
 	#read sd file
 	selectObject: sdListID
@@ -89,20 +98,10 @@ i = 1
 	selectObject: tgListID
 	tgName$ = baseName$ + ".TextGrid"
 	tgID = Read from file: stimTg$ + "/" + tgName$
+	intN = Get number of intervals: 2
 
-# Utterance-wise meausres  --------------------------
+### Utterance-wise meausres  --------------------------
 
-#	=======
-#	duration
-#	=======
-	timeS = Get time of point: 1, 1
-	timeE = Get time of point: 1, 2
-	duration = timeE - timeS
-
-#	===========
-#	Speech Rate
-#	===========
-	speechRate = duration/18
 
 #	========
 #	 Pitch
@@ -112,8 +111,35 @@ i = 1
 	selectObject: sdID
 	# argumants: time step (s; 0 means 0.75/pitch floor), Pitch floor (Hz), Pitch ceiling (Hz)
 	pitchID = To Pitch: 0.0, 75, 600
-	f0minSent = Get minimum: 0, 0, "Hertz", "parabolic"
-	f0maxSent = Get maximum: 0, 0, "Hertz", "parabolic"
+
+	f0mean = Get mean: 0,0, "Hertz" 
+	f0min = Get minimum: 0, 0, "Hertz", "parabolic"
+	f0max = Get maximum: 0, 0, "Hertz", "parabolic"
+	f0range = f0max - f0min
+	f0SD = Get standard deviation: 0, 0, "Hertz"
+
+#	=======
+#	duration
+#	=======
+	selectObject: tgID
+	timeS = Get time of point: 1, 1
+	timeE = Get time of point: 1, 2
+	duration = timeE - timeS
+
+#	===========
+#	Speech Rate
+#	===========
+	speechRate = duration/18
+
+#	=========
+#	intensity
+#	=========
+	selectObject: sdID
+	intSentID = To Intensity: f0min, 0, "yes"
+
+	intMeanSent = Get mean: timeS, timeE, "energy"
+
+	intSDSent = Get standard deviation: timeS, timeE
 
 #	====================
 #	1-to-3 kHz intensity
@@ -122,7 +148,7 @@ i = 1
 	selectObject: sdID
 
 	#only changing the first 2 arg: f0min, f0 max. The others (max freq, bandwidth, shortest period, longest period, Max period factor) are the defaults
-	ltasID = To Ltas (pitch-corrected): f0minSent, f0maxSent, 5000, 100, 0.0001, 0.02, 1.3
+	ltasID = To Ltas (pitch-corrected): f0min, f0max, 5000, 100, 0.0001, 0.02, 1.3
 
 	# Bin width = 100 Hz (confirmed from "Get bin width")
 	# Number of bins = 50 (confirmed from "Get number of bins")
@@ -139,11 +165,31 @@ i = 1
 	tilt1to3kHz = totalValue / 20
 
 
-# Each interval to get acoustic measures for each vowel ------------
+#	===================================
+#	 Appending Sentence acoustic Info
+#	===================================
+
+	selectObject: sentTableID
+	Append row
+	tblrow = Get number of rows
+	Set string value: tblrow, "filename", baseName$
+	Set numeric value: tblrow, "vowelCount", intN
+	Set numeric value: tblrow, "f0meanSent", f0mean
+	Set numeric value: tblrow, "f0minSent", f0min
+	Set numeric value: tblrow, "f0maxSent", f0max
+	Set numeric value: tblrow, "f0rangeSent", f0range
+	Set numeric value: tblrow, "f0SDSent", f0SD
+	Set numeric value: tblrow, "intMeanSent", intMeanSent
+	Set numeric value: tblrow, "intSDSent", intSDSent
+	Set numeric value: tblrow, "1to3kHzSent", tilt1to3kHz
+	Set numeric value: tblrow, "durationSent", duration
+	Set numeric value: tblrow, "speechRate", speechRate
+
+
+### Each interval to get vowel measures -------------------
 
 	#to get the number of intervals in this textgrid
-	selectObject: tgID 
-	intN = Get number of intervals: 2
+	selectObject: tgID
 
 	#extract all the non-empty intervals as sound obj
 	selectObject: sdID
@@ -151,17 +197,17 @@ i = 1
 	Extract non-empty intervals: 2, "no"
 
 	#get IDs of extracted sounds just created
-	firstID = selected ("Sound",1)
-	lastID = selected ("Sound",-1)
+	firstID = ltasID + 1
+	selectObject: tgID
+	nonempCt = Count intervals where: 2, "matches (regex)", "[A-Za-z]"
+	lastID = firstID + nonempCt - 1
 
 	count = 0
 	for k from firstID to lastID
 		# use this count to record which vowel in the file this is. (i.e., vowel No.?? of this sentence)
 		count = count + 1
-		selectObject: k
-
-		#get vowel
-		currVowel$ = selected$ ("Sound")	
+		selectObject: k	
+		vowelName$ = selected$ ()
 
 		#duration
 		voweldur = Get total duration
@@ -172,117 +218,148 @@ i = 1
 	#	=========
 	#	Formants
 	#	=========
+
 		selectObject: k
 		formantID = To Formant (burg): 0, 5, 5500, 0.025, 50
-		f1 = Get value at time: 1, midpoint, "hertz", "linear"
-		f2 = Get value at time: 2, midpoint, "hertz", "linear"
-		f3 = Get value at time: 3, midpoint, "hertz", "linear"
-		f4 = Get value at time: 4, midpoint, "hertz", "linear"
-		
+		f1c = Get value at time: 1, midpoint, "hertz", "linear"
+		f2c = Get value at time: 2, midpoint, "hertz", "linear"
+		f3c = Get value at time: 3, midpoint, "hertz", "linear"
+		f4c = Get value at time: 4, midpoint, "hertz", "linear"
+
+		f1m = Get mean: 1, 0, 0, "hertz"
+		f2m = Get mean: 2, 0, 0, "hertz"
+		f3m = Get mean: 3, 0, 0, "hertz"
+		f4m = Get mean: 4, 0, 0, "hertz"
+
 		#bandwidth
 		f1bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
-		f2bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
-		f3bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
-		f4bw = Get bandwidth at time: 1, midpoint, "hertz", "linear"
+		f2bw = Get bandwidth at time: 2, midpoint, "hertz", "linear"
+		f3bw = Get bandwidth at time: 3, midpoint, "hertz", "linear"
+		f4bw = Get bandwidth at time: 4, midpoint, "hertz", "linear"
+
+		#for later use
+		f1_lower= f1m-(f1m/10)
+		f1_upper = f1m+(f1m/10)
+		f2_lower = f2m-(f2m/10)
+		f2_upper = f2m+(f2m/10)
+		f3_lower = f3m-(f3m/10)
+		f3_upper = f3m+(f3m/10)
 
 	#	=======
-	#	  F0
+	#	 Pitch
 	#	=======
 
-		selectObject: k	
-		vowelPitchID = To Pitch: 0.0, 75, 600
-		#not sure if f0mid is meaningful so earse if i do not need this.
-		f0mid = Get value at time: midpoint, "Hertz", "linear"
-		f0mean = Get mean: 0,0, "Hertz" 
-		f0min = Get minimum: 0, 0, "Hertz", "parabolic"
-		f0max = Get maximum: 0, 0, "Hertz", "parabolic"
-		f0range = f0max - f0min
-		f0SD = Get standard deviation: 0, 0, "Hertz"
+		selectObject: k
+		vowelPitchID = To Pitch: 0.0, 100, 600
+		#NOTE: this created an error for sound u in 10_sad stim, so temp changed to 81. same for ppID
+		#--> still error for 12 happy. says cannot be less than 94.86...so changing to 95. same for ppID
+		#-->same error with 1_happy. says cannot be less than 95.1122... so chaging to 100. her pitch isnt less than 100 anyway. same for ppID.
+		
+		f0meanV = Get mean: 0,0, "Hertz"
+
 
 	#	=======
 	#	  HNR
 	#	=======
 		
-		selectObject: k	
+		selectObject: k
 		harmoID = To Harmonicity (cc): 0.01, 75, 0.1, 1
 		hnrMean = Get mean: 0, 0
 		hnrSD = Get standard deviation: 0, 0
 
-	#	======
-	#	 H1amp
-	#	======
-		#DiCanto getting from invl_pitch (=Pitch (ac) object
+	#	================
+	#	 Harmonics/spectral tilts
+	#	================
 		
-
-
-	#	========
-	#	 H1-H2  #Dicanto was taking this from ltas. also db was Get Maximum
-	#	========
-		h1Hz = f0mean
-		h2Hz = f0mean*2
+		h1Hz = f0meanV
+		h2Hz = f0meanV*2
 
 		h1Hz_low = h1Hz - (h1Hz/10)
 		h1Hz_high = h1Hz + (h1Hz/10) 		
 		
 		h2Hz_low = h2Hz - (h2Hz/10)
-		h2Hz_high = h2Hz + (h2Hz/10) 	
+		h2Hz_high = h2Hz + (h2Hz/10)
 
-		selectObject: k	
-		vowelLtas = To Ltas (pitch-corrected): f0min, f0max, 5000, 100, 0.0001, 0.02, 1.3
+		selectObject: k
+		vowelLtas = To Ltas (pitch-corrected): f0min, f0max, 5000, bw, 0.0001, 0.02, 1.3
+			#min f0 (75hz), max f0 (600Hz), max freq (5000Hz), bw (100Hz), shortest period (0.0001s), longest period (0.02 s), max period factor (1.3)
 
-		h1db = Get maximum: h1Hz_low, h1_high, None
-		h2db = Get maximum: h2Hz_low, h2_high, None
+		h1db = Get maximum: h1Hz_low, h1Hz_high, "None"
+		h2db = Get maximum: h2Hz_low, h2Hz_high, "None"
 
-		h1h2diff = h1db - h2db
-		h1h2prop = h1db/h2db
+		a1db = Get maximum... f1_lower f1_upper None
+		a2db = Get maximum... f2_lower f2_upper None
+		a3db = Get maximum... f3_lower f3_upper None
 
-	#	==========
-	#	 H1-3000Hz 
-	#	==========
-
-
-	#	========
-	#	 A1-P0 
-	#	========
-
-
+		h1h2 = h1db - h2db
+		h1a1 = h1db - a1db
+		h1a2 = h1db - a2db
+		h1a3 = h1db - a3db
 
 	#	===========
 	#	 Jitter
 	#	===========
-			selectObject: intExtractedID
-			jitterFileID = To PointProcess (periodic, cc): 75, 600
-			localJ = Get jitter (local): 0, 0, 0.0001, 0.02, 1.3
-			localAbsJ = Get jitter (local, absolute): 0, 0, 0.0001, 0.02, 1.3
-			rapJ = Get jitter (rap): 0, 0, 0.0001, 0.02, 1.3
-			ppq5J = Get jitter (ppq5): 0, 0, 0.0001, 0.02, 1.3
-			ddpJ = Get jitter (ddp): 0, 0, 0.0001, 0.02, 1.3
+		selectObject: k
+		ppID = To PointProcess (periodic, cc): 100, 600
+		localJ = Get jitter (local): 0, 0, 0.0001, 0.02, 1.3
+		localAbsJ = Get jitter (local, absolute): 0, 0, 0.0001, 0.02, 1.3
+		rapJ = Get jitter (rap): 0, 0, 0.0001, 0.02, 1.3
+		ppq5J = Get jitter (ppq5): 0, 0, 0.0001, 0.02, 1.3
+		ddpJ = Get jitter (ddp): 0, 0, 0.0001, 0.02, 1.3
 
 
 	#	===========
 	#	 Shimmer
 	#	===========
-			selectObject: intExtractedID
-			plusObject: jitterFileID		
-			localShim = Get shimmer (local): 0, 0, 0.0001, 0.02, 1.3, 1.6
-			localDbShim = Get shimmer (local_dB): 0, 0, 0.0001, 0.02, 1.3, 1.6
-			apq3Shim = Get shimmer (apq3): 0, 0, 0.0001, 0.02, 1.3, 1.6
-			apq5Shim = Get shimmer (apq5): 0, 0, 0.0001, 0.02, 1.3, 1.6
-			apq11Shim = Get shimmer (apq11): 0, 0, 0.0001, 0.02, 1.3, 1.6
-			ddaShim = Get shimmer (dda): 0, 0, 0.0001, 0.02, 1.3, 1.6
+		selectObject: ppID
+		plusObject: k		
+		localShim = Get shimmer (local): 0, 0, 0.0001, 0.02, 1.3, 1.6
+		localDbShim = Get shimmer (local_dB): 0, 0, 0.0001, 0.02, 1.3, 1.6
+		apq3Shim = Get shimmer (apq3): 0, 0, 0.0001, 0.02, 1.3, 1.6
+		apq5Shim = Get shimmer (apq5): 0, 0, 0.0001, 0.02, 1.3, 1.6
+		apq11Shim = Get shimmer (apq11): 0, 0, 0.0001, 0.02, 1.3, 1.6
+		ddaShim = Get shimmer (dda): 0, 0, 0.0001, 0.02, 1.3, 1.6
 
 	#	================
-	#	 Appending Info
+	#	 Appending vowel Info
 	#	================
-			selectObject: tableID
+
+			selectObject: vowelTableID
 			Append row
 			tblrow = Get number of rows
-			Set string value: tblrow, "filename", basename$
-			Set numeric value: tblrow, "f0Mean", f0mean
-			Set numeric value: tblrow, "f0SD", f0SD
-			Set numeric value: tblrow, "f0Range", f0range
+			Set string value: tblrow, "filename", baseName$
+			Set string value: tblrow, "vowel", vowelName$
+			Set numeric value: tblrow, "vowelNum", k
+			Set numeric value: tblrow, "voweldur", voweldur
+			Set numeric value: tblrow, "f0mean", f0meanV
+			Set numeric value: tblrow, "f1mean", f1m
+			Set numeric value: tblrow, "f2mean", f2m
+			Set numeric value: tblrow, "f3mean", f3m
+			Set numeric value: tblrow, "f4mean", f4m
+			Set numeric value: tblrow, "f1center", f1c
+			Set numeric value: tblrow, "f2center", f2c
+			Set numeric value: tblrow, "f3center", f3c
+			Set numeric value: tblrow, "f4center", f4c
+			Set numeric value: tblrow, "f1width", f1bw
+			Set numeric value: tblrow, "f2width", f2bw
+			Set numeric value: tblrow, "f3width", f3bw
+			Set numeric value: tblrow, "f4width", f4bw
+			Set numeric value: tblrow, "hnrMean", hnrMean
+			Set numeric value: tblrow, "hnrSD", hnrSD
+			Set numeric value: tblrow, "H1", h1db
+			Set numeric value: tblrow, "H1H2", h1h2
+			Set numeric value: tblrow, "H1A1", h1a1
+			Set numeric value: tblrow, "H1A2", h1a2
+			Set numeric value: tblrow, "H1A3", h1a3
+			Set numeric value: tblrow, "jitterVowel", localJ
+			Set numeric value: tblrow, "shimmerVowel", localShim
+
+ 
+		##Cleaning
+			removeObject: k, formantID, vowelPitchID, harmoID, vowelLtas, ppID
 
 		endif
-
-
+	endfor
 endfor
+
+exitScript: "Done!!!"
