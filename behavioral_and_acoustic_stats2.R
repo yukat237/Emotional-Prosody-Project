@@ -8,6 +8,41 @@
 
 # Goal: to combine Main study Data Analysis script and Acoustic Analysis script, with only necessary info.
 
+######------------   OVERVIEW of this script   -------------######
+
+# working directory and libraries
+# Main Behavioral Data Analysis
+    # Import and Clean data
+      # Qultrix Behavioral data
+      # Prolific Demographic data
+      # Combine the 2 data above
+      # Drop unnecesarry data
+      # Make "analysisdf" --- 
+    # Tweaking the DF more for stats
+      # "dfforlmer"
+      # add a column for correct of not
+      # add a column for accuracy
+      # add accuracy by Japanese pilot study
+      # correlation - Jap accuracy X nonJap accuracy
+    # visualization of Jap accuracy X nonJap accuracy
+    # making df for Accuracy by subj
+      # accpersubj
+      # keeping only happy and sad
+# Main Behavioral Stats
+    # boxplot visualization
+    # cleaning dfforlmer again for Glmer
+    # contrast coding
+    # Glmer modeling
+      # m_max ... fits the best, with interaction
+      # m_max2 ... fits the best, without interaction
+      # comparing m_max and m_max2 with anova
+    # More-than-chance Rate
+# Acoustic Data Analysis
+    # import data
+    # clean data
+
+
+
 ######------------   workDir and libraries   -------------######
 
 library("dplyr")
@@ -15,6 +50,8 @@ library("tidyr")
 library("lme4")
 library("ggpubr")
 library("ggplot2")
+library("memisc") #for contr.sum?
+library("stats")
 
 setwd("C:/Users/yuka/iCloudDrive/休学2020/Emotional Prosody Project/")
 options(max.print=1000000)
@@ -260,8 +297,9 @@ dfforGlmer$group<-as.factor(dfforGlmer$group)
 dfforGlmer$item<-as.factor(dfforGlmer$item)
 
 #---Contrast coding---#
-contrasts(dfforGlmer$group)<-contr.Sum(levels(dfforGlmer$group))
-contrasts(dfforGlmer$valence)<-contr.Sum(levels(dfforGlmer$valence))
+contrasts(dfforGlmer$group)<-contr.sum(levels(dfforGlmer$group))
+contrasts(dfforGlmer$valence)<-contr.sum(levels(dfforGlmer$valence))
+#this used to be contr.Sum (with the uppercase S), but did not run. changed to small s. (4/25/2024)
 
 #---Glmer models---#
 
@@ -284,7 +322,7 @@ m_max2<-glmer(accuracy~1+group+valence+(1+valence|subjID)+(1+valence|item),
               data=dfforGlmer,family = binomial, 
               control = glmerControl(optimizer = "bobyqa",optCtrl = list(maxfun=1e6)),verbose = 1)
 
-accuracy~1+group+valence+(1+valence|subjID)+(1+valence|item)
+#accuracy~1+group+valence+(1+valence|subjID)+(1+valence|item)
 
 #this fits!!
 
@@ -303,5 +341,51 @@ sd(mtcr$accuracy)
 #sd 0.1122
 #range0.2500-0.7812
 
+
+
+
+
+
+######--- Acoustic Data Analysis -----######
+
+###----- Import Data ------###
+
+acoustics_tbl_sent<-read.table("For acoustic analysis 2/outputTableSentence.txt", header = T)
+acoustics_tbl_vowel<-read.table("For acoustic analysis 2/outputTableVowel.txt", header = T)
+  #Make sure you take  out "Sound " from the second column
+#forcolname<-as.character(acoustics_tbl[1,])
+#colnames(acoustics_tbl)<-forcolname
+
+###----Clean the table-----###
+
+##----Sent Table----
+
+#add emo column to Sent table
+emo_col<-data.frame(matrix(ncol=1,nrow=1))
+for (n in 1:nrow(acoustics_tbl_sent)){
+  emotest<-grepl("sad", acoustics_tbl_sent[n,1])
+  emotest_status<-ifelse(emotest == TRUE, "sad", "happy")
+  emo_col[n,]<-emotest_status
+}
+
+acoustics_tbl_sent[13]<-emo_col
+colnames(acoustics_tbl_sent)[13]<-"emotion"
+
+#add item_num column to Sent table
+#Note: 4/24 -- check if these items are correct
+itemnum_col<-c("item55","item221","item242","item263","item223",
+               "item144","item244","item265","item151","item251"
+               ,"item172","item272","item193","item214","item174",
+               "item81","item235","item195","item102","item62","item123","item83",
+               "item104","item25","item125","item11","item111","item132","item53","item13","item74","item34")
+acoustics_tbl$itemNum<-itemnum_col
+actbl<-acoustics_tbl #rename the df name
+
+##----Vowel Table----
+
+
+
+
+#####--- Acoustics Stats ---#####
 
 
