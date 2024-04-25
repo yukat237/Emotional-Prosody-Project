@@ -154,6 +154,7 @@ colnames(accperitem)[3]<-"howmany_corr"
 
 ##add accuracy by Japanese
 accperitem$acc_jap<-c(100,100,100,100,100,100,80,80,80,80,70,70,90,80,80,70,60,70,70,60,70,100,60,70,60,70,70,80,60,60,80,100,100,100,100,100,90,100,100,90,100,100,90,100,90,100,100,90,100,100,100,90,100,100,100,90,90)
+  #Anger - 5, Disgust - 5, Fear - 5, Happy - 16, neutral - 5, sadness - 16, Surprise - 5
 
 #Correlation with Japanese accuracy
 cor.test(accperitem$accuracy,accperitem$acc_jap)
@@ -176,7 +177,7 @@ plot(accperitem$accuracy,accperitem$acc_jap)
 abline(lm(acc_jap ~ accuracy, data = accperitem), col = "blue")
 
 
-##making df for Accuracy by subj
+###----making df for Accuracy by subj----
 dfforlmer$corr_ornot<-as.numeric(dfforlmer$corr_ornot)
 accpersubj<- aggregate(corr_ornot~subjID+corr_ans, data=dfforlmer, sum)
 
@@ -194,12 +195,9 @@ colnames(newmainDF)[2]<-"emo" #rewrite corr_ans to emo
 
 
 
-
 #####---Main Behavioral Stats ---#####
 
-####-----NEW-----####
-
-##visualization
+####---visualization---####
 ggboxplot(newmainDF, x = "emo", y = "accuracy", 
           fill = "biormono",
           ylab = "Accuracy", xlab = "Valence")+
@@ -207,4 +205,103 @@ ggboxplot(newmainDF, x = "emo", y = "accuracy",
   scale_x_discrete(labels=c("Positive","Negative"))
 #I changed the color to try.., diff from what I initially had on google doc MAIN ARTICLE (if you want the original, just remove the color values)
 #another blue ...6CB0D6
+
+####---Cleaning the DF again for Glmer---####
+
+#origianl DF to use --> dfforlmer
+
+#drop other emotion data
+dfforGlmer<-dfforlmer%>%filter(corr_ans=="Happiness"|corr_ans=="Sadness")
+#drop the raw response column
+dfforGlmer<-dfforGlmer[,c(1:3,5,6)]
+#rename colnames#
+colnames(dfforGlmer)[which(names(dfforGlmer)=="corr_ans")]<-"valence" #independent variable2
+colnames(dfforGlmer)[which(names(dfforGlmer)=="corr_ornot")]<-"accuracy" #independent variable1
+colnames(dfforGlmer)[which(names(dfforGlmer)=="biormono")]<-"group" #dependent variable
+colnames(dfforGlmer)[which(names(dfforGlmer)=="items")]<-"item"
+#---Fix the item coding (same itemNum for same sentence1~20)----#
+dfforGlmer$item[dfforGlmer$item=="item11"]<-"6"
+dfforGlmer$item[dfforGlmer$item=="item25"] <-"5"
+dfforGlmer$item[dfforGlmer$item=="item53" ]<-"8"
+dfforGlmer$item[dfforGlmer$item=="item74" ]<-"9"
+dfforGlmer$item[dfforGlmer$item=="item81" ]<-"1"
+dfforGlmer$item[dfforGlmer$item=="item102"]<-"2"
+dfforGlmer$item[dfforGlmer$item=="item123" ]<-"3"
+dfforGlmer$item[dfforGlmer$item=="item144" ]<-"14"
+dfforGlmer$item[dfforGlmer$item=="item151" ]<-"16"
+dfforGlmer$item[dfforGlmer$item=="item172" ]<-"17"
+dfforGlmer$item[dfforGlmer$item=="item193" ]<-"18"
+dfforGlmer$item[dfforGlmer$item=="item214" ]<-"19"
+dfforGlmer$item[dfforGlmer$item=="item221" ]<-"11"
+dfforGlmer$item[dfforGlmer$item=="item235" ]<-"20"
+dfforGlmer$item[dfforGlmer$item=="item242" ]<-"12"
+dfforGlmer$item[dfforGlmer$item=="item263" ]<-"13" #Hap done
+dfforGlmer$item[dfforGlmer$item=="item34" ]<-"9" #Sad from here
+dfforGlmer$item[dfforGlmer$item=="item55" ]<-"10"
+dfforGlmer$item[dfforGlmer$item=="item62" ]<-"2"
+dfforGlmer$item[dfforGlmer$item=="item111" ]<-"6"
+dfforGlmer$item[dfforGlmer$item=="item125" ]<-"5"
+dfforGlmer$item[dfforGlmer$item=="item132" ]<-"7"
+dfforGlmer$item[dfforGlmer$item=="item174" ]<-"19"
+dfforGlmer$item[dfforGlmer$item=="item223" ]<-"13"
+dfforGlmer$item[dfforGlmer$item=="item251" ]<-"16"
+dfforGlmer$item[dfforGlmer$item=="item265" ]<-"15"
+dfforGlmer$item[dfforGlmer$item=="item13" ]<-"8"
+dfforGlmer$item[dfforGlmer$item=="item83" ]<-"3"
+dfforGlmer$item[dfforGlmer$item=="item104" ]<-"4"
+dfforGlmer$item[dfforGlmer$item=="item195" ]<-"20"
+dfforGlmer$item[dfforGlmer$item=="item244" ]<-"14"
+dfforGlmer$item[dfforGlmer$item=="item272" ]<-"17"#sad done
+
+#---Turn into factor---#
+dfforGlmer$subjID<-as.factor(dfforGlmer$subjID)
+dfforGlmer$valence<-as.factor(dfforGlmer$valence)
+dfforGlmer$group<-as.factor(dfforGlmer$group)
+dfforGlmer$item<-as.factor(dfforGlmer$item)
+
+#---Contrast coding---#
+contrasts(dfforGlmer$group)<-contr.Sum(levels(dfforGlmer$group))
+contrasts(dfforGlmer$valence)<-contr.Sum(levels(dfforGlmer$valence))
+
+#---Glmer models---#
+
+m_max<-glmer(accuracy~1+group*valence+(1+valence|subjID)+(1+valence|item),
+             data=dfforGlmer,family = binomial, 
+             control = glmerControl(optimizer = "bobyqa",optCtrl = list(maxfun=1e6)),verbose = 1)
+#this fits!
+m_max_summary<-summary(m_max)
+
+#just in case I am trying more complicated ones...
+m_complex1<-glmer(accuracy~1+group*valence+(1+valence|subjID)+(1+group*valence|item),
+                  data=dfforGlmer,family = binomial, 
+                  control = glmerControl(optimizer = "bobyqa",optCtrl = list(maxfun=1e6)),verbose = 1)
+#this gave me: boundary (singular) fit: see ?isSingular. so I did isSingular(m_complex1) and it returned TRUE
+
+#Now I try non-interaction one.
+
+
+m_max2<-glmer(accuracy~1+group+valence+(1+valence|subjID)+(1+valence|item),
+              data=dfforGlmer,family = binomial, 
+              control = glmerControl(optimizer = "bobyqa",optCtrl = list(maxfun=1e6)),verbose = 1)
+
+accuracy~1+group+valence+(1+valence|subjID)+(1+valence|item)
+
+#this fits!!
+
+#Model comparison with anova
+m_comp<-anova(m_max,m_max2)
+#chi sq = 0.5911, df = 1, p = 0.442
+#interaction is NOT making the model any better.
+
+
+#---Exploring More-than-chance Rate---#
+mtcr<-aggregate(accuracy~subjID, data=newmainDF, mean)
+summary(mtcr)
+sd(mtcr$accuracy)
+#this shows all participants accuracy (thruout the experiment) are ALL over chance (1/7=0.14)
+#mean 0.5367
+#sd 0.1122
+#range0.2500-0.7812
+
+
 
