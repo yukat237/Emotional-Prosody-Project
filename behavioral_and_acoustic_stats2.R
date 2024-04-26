@@ -379,7 +379,7 @@ itemnum_col<-c("item55","item221","item242","item263","item223",
                "item81","item235","item195","item102","item62","item123","item83",
                "item104","item25","item125","item11","item111","item132","item53","item13","item74","item34")
 acoustics_tbl_sent$itemNum<-itemnum_col
-acSent<-acoustics_tbl_sent #rename the df name
+acS<-acoustics_tbl_sent #rename the df name
 
 ##----Vowel Table----
 
@@ -401,7 +401,7 @@ ref_chart<-read.table("For acoustic analysis 2/itemnum_filenamenum_chart.txt", h
 acoustics_tbl_vowel$comb<-paste0(acoustics_tbl_vowel$emotion,acoustics_tbl_vowel$filenum)
 acoustics_tbl_vowel<- merge(acoustics_tbl_vowel,ref_chart, by.x = "comb", by.y = "filenum", all.x = T)
 acoustics_tbl_vowel$itemNum <- paste("item", acoustics_tbl_vowel$itemNum, sep = "")
-acVowel <- acoustics_tbl_vowel[, !names(acoustics_tbl_vowel) == "comb"]
+acV <- acoustics_tbl_vowel[, !names(acoustics_tbl_vowel) == "comb"]
 
 #----Averaging some data?----#
 
@@ -419,26 +419,443 @@ acVowel <- acoustics_tbl_vowel[, !names(acoustics_tbl_vowel) == "comb"]
 #hnrMean/SD...can average by item
 #H1, H1H2, H1A1, H1A2, H1A3, jitterV, shimmerV...can average by item
 
+#taking out hnrSD for now because it is causing error
+acV_grpd <- acV %>%
+  group_by(filename, emotion) %>%
+  summarize(
+    avg_f0mean = mean(f0mean),
+    avg_hnrMean = mean(hnrMean),
+    avg_H1 = mean(H1),
+    avg_H1H2 = mean(H1H2),
+    avg_H1A1 = mean(H1A1),
+    avg_H1A2 = mean(H1A2),
+    avg_H1A3 = mean(H1A3),
+    avg_jitterVowel = mean(jitterVowel),
+    avg_shimmerVowel = mean(shimmerVowel)
+  )
 
 #####--- Acoustics Stats ---#####
 #Main thing I want to know: what are they listening to? how are they different from Japanese people?
+# Note: dataframes used --> acS, acV
 
-# Q1. Is sadness sig different from happiness, for each acoustic measure? (kinda descriptive)
+# Q1. Is sadness sig different from happiness, for each acoustic measure? (kinda descriptive) -----------
 
-ggboxplot(actbl, x = "emotion", y = "f0Mean", 
-          fill = "emotion", palette = c("#00AFBB", "#FF7F7F"),
-          ylab = "F0 Mean", xlab = "Emotion")
+#f0mean---
 
-# Q2. which acoustic features are different between the "Hardest"(lowest accuracy)item vs "Easiest" (highest accuracy)item?
+ggplot(acS, aes(x = emotion, y = f0meanSent,
+               fill = emotion,
+               shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#f0max---
+
+ggplot(acS, aes(x = emotion, y = f0minSent,
+                fill = emotion,
+                shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#f0range---
+
+ggplot(acS, aes(x = emotion, y = f0rangeSent,
+                fill = emotion,
+                shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
 
 
-# Q3. Was accuracy correlated with any of the acoustic measures? (looking at bi and mo separately)<- I think we can look at together, as main results were nonsig
+#f0SD---
 
 
-# Q4. Is accuracy affected by any acoustic measures? (sad and hap separate, mono/bi as a factor)-random 
+ggplot(acS, aes(x = emotion, y = f0SDSent,
+                fill = emotion,
+                shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#intMean---
+
+ggplot(acS, aes(x = emotion, y = intMeanSent,
+                fill = emotion,
+                shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#intSD---
+
+ggplot(acS, aes(x = emotion, y = intSDSent,
+                fill = emotion,
+                shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#oneto3kHz--
+
+ggplot(acS, aes(x = emotion, y = X1to3kHzSent,
+                fill = emotion,
+                shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#duration---
+
+ggplot(acS, aes(x = emotion, y = durationSent,
+                fill = emotion,
+                shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
 
 
-# Q5. Is accuracy affected by any acoustic measures? JAPANESE ver.(sad and hap separate) <- any effect of background?
+#speechRate---
+
+
+ggplot(acS, aes(x = emotion, y = speechRate,
+                fill = emotion,
+                shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#f0mean (Vowel)---
+
+#f1mean ---
+
+#f2mean ---
+
+#f3mean ---
+
+#f4mean ---
+
+#f1center ---
+
+#f2center ---
+
+#f3center ---
+
+#f4center ---
+
+#f1bandwidth ---
+
+#f2bandwidth ---
+
+#f3bandwidth ---
+
+#f4bandwidth ---
+
+#hnrmean ---
+
+ggplot(acV_grpd, aes(x = emotion, y = avg_hnrMean,
+                fill = emotion,
+                shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#hnrSD ---
+
+  
+
+#H1 ---
+
+ggplot(acV_grpd, aes(x = emotion, y = avg_H1,
+                     fill = emotion,
+                     shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#H1H2 ---
+
+ggplot(acV_grpd, aes(x = emotion, y = avg_H1H2,
+                     fill = emotion,
+                     shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#H1A1 ---
+
+ggplot(acV_grpd, aes(x = emotion, y = avg_H1A1,
+                     fill = emotion,
+                     shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#H1A2 ---
+
+ggplot(acV_grpd, aes(x = emotion, y = avg_H1A2,
+                     fill = emotion,
+                     shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#H1A3 ---
+
+ggplot(acV_grpd, aes(x = emotion, y = avg_H1A3,
+                     fill = emotion,
+                     shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#jitter ---
+
+ggplot(acV_grpd, aes(x = emotion, y = avg_jitterVowel,
+                     fill = emotion,
+                     shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+#shimmer ---
+
+ggplot(acV_grpd, aes(x = emotion, y = avg_shimmerVowel,
+                     fill = emotion,
+                     shape = emotion)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  scale_fill_manual(values = c("#f57178","#80d3e8"))
+
+### interim summary -------------
+
+# f0mean -- ave bit higher for sad. variety sig smaller for sad. variety wider for happy. 
+# f0range -- ave simillar (sad slightly higher), but wide variety of range for sad vs less variety of range in happy
+# f0SD -- happy higher, sad lower
+# intensity -- sad lower, happy higher
+# duration/speech rate -- sad higher, happy lower
+# H1 related measures are all showing big differences betw emotion. (sad lower; huge in H1, H1A1. less diff in H1A3)
+# shimmer/jitter --> diff barely exists
+
+
+# Q2. which acoustic features are different between the "Hardest"(lowest accuracy)item vs "Easiest" (highest accuracy)item? --------
+
+
+#f0mean---
+
+#f0max---
+
+#f0range---
+
+#f0SD---
+
+#intMean---
+
+#intSD---
+
+#oneto3kHz--
+
+#duration---
+
+#speechRate---
+
+#f0mean (Vowel)---
+
+#f1mean ---
+
+#f2mean ---
+
+#f3mean ---
+
+#f4mean ---
+
+#f1center ---
+
+#f2center ---
+
+#f3center ---
+
+#f4center ---
+
+#f1bandwidth ---
+
+#f2bandwidth ---
+
+#f3bandwidth ---
+
+#f4bandwidth ---
+
+#hnrmean ---
+
+#hnrSD ---
+
+#H1 ---
+
+#H1H2 ---
+
+#H1A1 ---
+
+#H1A2 ---
+
+#H1A3 ---
+
+#jitter ---
+
+#shimmer ---
+
+
+
+# Q3. Was accuracy correlated with any of the acoustic measures? (hap and sad separately) ----------
+
+#-- x axis = acoustic measures, y axis = accuracy, fill = emotion
+
+#-----PREP------# (merging all acoustics to behavioral)
+#reshaped <- pivot_longer(analysisdf, cols = -c(subjID, biormono), names_to = "item", values_to = "response")
+
+## SENT PREP ##
+
+acB<- dfforlmer[, !names(dfforlmer) == c("biormono")&!names(dfforlmer) == c("answer")] #delete biormono column
+#acS[15] <- gsub("^(.*?)_.*", "\\1", acS$filename)
+#colnames(acB)[15]<-"items"
+
+#rewrite acS's emotion to valence.
+colnames(acS)[13]<-"valence"
+acB<-subset(acB, acB$corr_ans=="Happiness"|acB$corr_ans=="Sadness")
+colnames(acB)[3]<-"valence"
+acB$valence<-as.character(acB$valence)
+acB[acB == "Happiness"] <- "happy"
+acB[acB == "Sad"] <- "sad"
+#merge behaviors and acoustics
+acS$valence<-as.factor(acS$valence)
+acB$valence<-as.factor(acB$valence)
+acB$items<-as.factor(acB$items)
+acS$item<-as.factor(acS$item)
+#aggragate
+agg_df <- aggregate(corr_ornot ~ items, data = acB, FUN = sum)
+#add percentage correct
+agg_df$accuracy<-agg_df$corr_ornot/52
+#merge B and acoustics
+colnames(agg_df)[1]<-"item"
+ac_b_merged<- merge(agg_df, acS, by = "item")
+
+
+## VOWEL PREP ##
+acV_grpd <- 
+
+
+#f0mean---
+
+ggplot(ac_b_merged, aes(x = f0meanSent, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  theme_bw() +
+  stat_ellipse(type = "norm")
+
+ggplot(ac_b_merged, aes(x = f0meanSent, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+
+#f0max---
+
+ggplot(ac_b_merged, aes(x = f0maxSent, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#f0range---
+
+ggplot(ac_b_merged, aes(x = f0rangeSent, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#f0SD---
+
+#intMean---
+
+ggplot(ac_b_merged, aes(x = intMeanSent, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#intSD---
+ggplot(ac_b_merged, aes(x = intSDSent, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+
+#oneto3kHz--
+ggplot(ac_b_merged, aes(x = X1to3kHzSent, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#duration---
+
+ggplot(ac_b_merged, aes(x = durationSent, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#speechRate---
+
+ggplot(ac_b_merged, aes(x = speechRate, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#f0mean (Vowel)---
+
+#f1mean ---
+
+#f2mean ---
+
+#f3mean ---
+
+#f4mean ---
+
+#f1center ---
+
+#f2center ---
+
+#f3center ---
+
+#f4center ---
+
+#f1bandwidth ---
+
+#f2bandwidth ---
+
+#f3bandwidth ---
+
+#f4bandwidth ---
+
+#hnrmean ---
+
+#hnrSD ---
+
+#H1 ---
+
+#H1H2 ---
+
+#H1A1 ---
+
+#H1A2 ---
+
+#H1A3 ---
+
+#jitter ---
+
+#shimmer ---
+
+
+# Q4. Is accuracy affected by any acoustic measures? (sad and hap separate, mono/bi as a factor)-random   -------------
+
+
+
+# Q5. Is accuracy affected by any acoustic measures? JAPANESE ver.(sad and hap separate) <- any effect of background?  -----------
 
 
 
