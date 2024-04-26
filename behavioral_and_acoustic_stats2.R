@@ -371,21 +371,74 @@ for (n in 1:nrow(acoustics_tbl_sent)){
 acoustics_tbl_sent[13]<-emo_col
 colnames(acoustics_tbl_sent)[13]<-"emotion"
 
-#add item_num column to Sent table
-#Note: 4/24 -- check if these items are correct
+#add item_num column to Sent table (so that can be used to match)
+#Note: 4/24 -- checked. this is correct.
 itemnum_col<-c("item55","item221","item242","item263","item223",
                "item144","item244","item265","item151","item251"
                ,"item172","item272","item193","item214","item174",
                "item81","item235","item195","item102","item62","item123","item83",
                "item104","item25","item125","item11","item111","item132","item53","item13","item74","item34")
-acoustics_tbl$itemNum<-itemnum_col
-actbl<-acoustics_tbl #rename the df name
+acoustics_tbl_sent$itemNum<-itemnum_col
+acSent<-acoustics_tbl_sent #rename the df name
 
 ##----Vowel Table----
 
+#I need to add emo and itemNum
+#adding emotion column
+emo_col<-data.frame(matrix(ncol=1,nrow=1))
+for (n in 1:nrow(acoustics_tbl_vowel)){
+  emotest<-grepl("sad", acoustics_tbl_vowel[n,1])
+  emotest_status<-ifelse(emotest == TRUE, "sad", "happy")
+  emo_col[n,]<-emotest_status
+}
+acoustics_tbl_vowel[27]<-emo_col
+colnames(acoustics_tbl_vowel)[27]<-"emotion"
 
+#adding itemNum column
+acoustics_tbl_vowel[28] <- gsub("^(.*?)_.*", "\\1", acoustics_tbl_vowel$filename)
+colnames(acoustics_tbl_vowel)[28]<-"filenum"
+ref_chart<-read.table("For acoustic analysis 2/itemnum_filenamenum_chart.txt", header = T)
+acoustics_tbl_vowel$comb<-paste0(acoustics_tbl_vowel$emotion,acoustics_tbl_vowel$filenum)
+acoustics_tbl_vowel<- merge(acoustics_tbl_vowel,ref_chart, by.x = "comb", by.y = "filenum", all.x = T)
+acoustics_tbl_vowel$itemNum <- paste("item", acoustics_tbl_vowel$itemNum, sep = "")
+acVowel <- acoustics_tbl_vowel[, !names(acoustics_tbl_vowel) == "comb"]
+
+#----Averaging some data?----#
+
+#SENTENCE TABLE#
+#itemNum/filename = ID
+#f0mean/max/range/SD
+#intMean/SD/1to3kHz
+#duration/speechRate
+
+#VOWEL TABLE#
+#vowelNum = ID
+#vowel = category
+#f0...can average by item
+#f1/2/3/4 mean, center, width...ave by vowel
+#hnrMean/SD...can average by item
+#H1, H1H2, H1A1, H1A2, H1A3, jitterV, shimmerV...can average by item
 
 
 #####--- Acoustics Stats ---#####
+#Main thing I want to know: what are they listening to? how are they different from Japanese people?
+
+# Q1. Is sadness sig different from happiness, for each acoustic measure? (kinda descriptive)
+
+ggboxplot(actbl, x = "emotion", y = "f0Mean", 
+          fill = "emotion", palette = c("#00AFBB", "#FF7F7F"),
+          ylab = "F0 Mean", xlab = "Emotion")
+
+# Q2. which acoustic features are different between the "Hardest"(lowest accuracy)item vs "Easiest" (highest accuracy)item?
+
+
+# Q3. Was accuracy correlated with any of the acoustic measures? (looking at bi and mo separately)<- I think we can look at together, as main results were nonsig
+
+
+# Q4. Is accuracy affected by any acoustic measures? (sad and hap separate, mono/bi as a factor)-random 
+
+
+# Q5. Is accuracy affected by any acoustic measures? JAPANESE ver.(sad and hap separate) <- any effect of background?
+
 
 
