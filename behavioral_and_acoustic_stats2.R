@@ -740,7 +740,26 @@ ac_b_merged<- merge(agg_df, acS, by = "item")
 
 
 ## VOWEL PREP ##
-acV_grpd <- 
+
+#needs to have item num column
+needed_colNum <- ncol(acV_grpd) + 1
+acV_grpd[needed_colNum] <- gsub("^(.*?)_.*", "\\1", acV_grpd$filename)
+colnames(acV_grpd)[needed_colNum]<-"filenum"
+acV_grpd$comb<-paste0(acV_grpd$emotion,acV_grpd$filenum)
+acV_grpd<-merge(acV_grpd,ref_chart, by.x = "comb", by.y = "filenum", all.x = T)
+acV_grpd$itemNum <- paste("item", acV_grpd$itemNum, sep = "")
+acV_grpd <- acV_grpd[, !names(acV_grpd) == "comb"]
+
+#rewrite emo to valence / itemNum to item
+colnames(acV_grpd)[2]<-"valence"
+colnames(acV_grpd)[13]<-"item"
+
+#prep for merge 
+acV_grpd$valence<-as.factor(acV_grpd$valence)
+acV_grpd$item<-as.factor(acV_grpd$item)
+
+#merge acV to ac_b_merged
+ac_b_merged_wV <- merge(acV_grpd, ac_b_merged, by = c("item", "filename", "valence"))
 
 
 #f0mean---
@@ -834,28 +853,230 @@ ggplot(ac_b_merged, aes(x = speechRate, y = accuracy, colour= valence)) +
 
 #hnrmean ---
 
+ggplot(ac_b_merged_wV, aes(x = avg_hnrMean, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+
 #hnrSD ---
+#(got an error haven't dealt yet)
 
 #H1 ---
+ggplot(ac_b_merged_wV, aes(x = avg_H1, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
 
 #H1H2 ---
+ggplot(ac_b_merged_wV, aes(x = avg_H1H2, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
 
 #H1A1 ---
+ggplot(ac_b_merged_wV, aes(x = avg_H1A1, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
 
 #H1A2 ---
+ggplot(ac_b_merged_wV, aes(x = avg_H1A2, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
 
 #H1A3 ---
+ggplot(ac_b_merged_wV, aes(x = avg_H1A3, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
 
 #jitter ---
 
+ggplot(ac_b_merged_wV, aes(x = avg_jitterVowel, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
 #shimmer ---
 
+ggplot(ac_b_merged_wV, aes(x = avg_shimmerVowel, y = accuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
 
 # Q4. Is accuracy affected by any acoustic measures? (sad and hap separate, mono/bi as a factor)-random   -------------
 
 
 
+
+
+
+
+
+
+
+
+
+
 # Q5. Is accuracy affected by any acoustic measures? JAPANESE ver.(sad and hap separate) <- any effect of background?  -----------
 
+##---- PREP -----##
+
+ref_japAcc<-read.table("For acoustic analysis 2/japaneseAccuracy.txt", header = T)
+colnames(ref_japAcc)[2]<-"item"
+ref_japAcc$item<-as.factor(ref_japAcc$item)
+ref_japAcc$valence<-as.factor(ref_japAcc$valence)
+
+jap_ac_b_merged_wV<-merge(ref_japAcc, ac_b_merged_wV, by = c("item", "valence"))
+
+#x axis = acosutics, y axis = Japanese accuracy
+
+#f0mean---
+
+ggplot(jap_ac_b_merged_wV, aes(x = f0meanSent, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  theme_bw() +
+  stat_ellipse(type = "norm")
+
+ggplot(jap_ac_b_merged_wV, aes(x = f0meanSent, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+
+#f0max---
+
+ggplot(jap_ac_b_merged_wV, aes(x = f0maxSent, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#f0range---
+
+ggplot(jap_ac_b_merged_wV, aes(x = f0rangeSent, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#f0SD---
+
+#intMean---
+
+ggplot(jap_ac_b_merged_wV, aes(x = intMeanSent, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#intSD---
+ggplot(jap_ac_b_merged_wV, aes(x = intSDSent, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+
+#oneto3kHz--
+ggplot(jap_ac_b_merged_wV, aes(x = X1to3kHzSent, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#duration---
+
+ggplot(jap_ac_b_merged_wV, aes(x = durationSent, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#speechRate---
+
+ggplot(jap_ac_b_merged_wV, aes(x = speechRate, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#f0mean (Vowel)---
+
+#f1mean ---
+
+#f2mean ---
+
+#f3mean ---
+
+#f4mean ---
+
+#f1center ---
+
+#f2center ---
+
+#f3center ---
+
+#f4center ---
+
+#f1bandwidth ---
+
+#f2bandwidth ---
+
+#f3bandwidth ---
+
+#f4bandwidth ---
+
+#hnrmean ---
+
+ggplot(jap_ac_b_merged_wV, aes(x = avg_hnrMean, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+
+#hnrSD ---
+#(got an error haven't dealt yet)
+
+#H1 ---
+ggplot(jap_ac_b_merged_wV, aes(x = avg_H1, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#H1H2 ---
+ggplot(jap_ac_b_merged_wV, aes(x = avg_H1H2, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#H1A1 ---
+ggplot(jap_ac_b_merged_wV, aes(x = avg_H1A1, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+
+#H1A2 ---
+ggplot(jap_ac_b_merged_wV, aes(x = avg_H1A2, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#H1A3 ---
+ggplot(jap_ac_b_merged_wV, aes(x = avg_H1A3, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#jitter ---
+
+ggplot(jap_ac_b_merged_wV, aes(x = avg_jitterVowel, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
+
+#shimmer ---
+
+ggplot(jap_ac_b_merged_wV, aes(x = avg_shimmerVowel, y = japAccuracy, colour= valence)) +
+  geom_point(size = 4) +
+  geom_smooth(method=lm, aes(colour=valence)) +
+  theme_bw()
 
 
